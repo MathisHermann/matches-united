@@ -6,6 +6,3 @@ RewriteRule ^(.*)$ http://yourdomain.com/$1 [L,R=301]
 RewriteCond %{HTTPS} !on
 RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
 
-RewriteCond %{REQUEST_METHOD} !^(HEAD|OPTIONS|POST|PUT)
-RewriteRule .* - [F]
-
