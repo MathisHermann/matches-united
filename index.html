@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matches UHC BU - Herren 2</title>
+    <script src="https://unpkg.com/vue"></script>
+
+    <style>
+        .thicc {
+          font-weight: 800;
+        }
+      </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Matches</h1>
+
+        <table>
+            <tr>
+                <th v-for="header in headers">{{ header.text }}</th>
+            </tr>
+            <tr v-for=" {cells} in dates">
+                <td>
+                    <div>
+                        {{ cells[0].text[0] + ' ' + cells[0].text[1] }}
+                    </div>
+                </td>
+                <td>
+                    <div>{{ cells[1].text[1] }}</div>
+                    <div>{{ cells[1].text[0] }}</div>
+                </td>
+                <td>
+                    <div><span :class="{ thicc : cells[2].text[0] == 'UHC Basel United II' }">{{ cells[2].text[0]
+                            }}</span></div>
+                </td>
+                <td>
+                    <div><span :class="{ thicc : cells[3].text[0] == 'UHC Basel United II' }">{{ cells[3].text[0]
+                            }}</span></div>
+                </td>
+                <td>
+                    <div>Resultat <span>{{ cells[4].text[0] }}</span></div>
+                </td>
+            </tr>
+        </table>
+
+        <select v-model="page">
+            <option disabled value="">-</option>
+            <template v-for="page in pages">
+                <option :id="page" :value="page">
+                    {{ page }}
+                </option>
+            </template>
+        </select>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+        const API_URL = `https://api-v2.swissunihockey.ch/api/games?mode=team&season=2022&team_id=428375`
+
+        createApp({
+            data: () => ({
+                dates: null,
+                headers: null,
+                pages: [1, 2],
+                page: null
+            }),
+
+            created() {
+                // fetch on init
+                this.fetchData()
+            },
+
+            methods: {
+                async fetchData() {
+                    const url = `${API_URL}` + (this.page !== null ? `&page=${this.page}` : '')
+                    let response = await (await fetch(url)).json()
+                    this.dates = response.data.regions[0].rows
+                    this.headers = response.data.headers
+                    this.page = response.data.context.page
+                }
+            },
+
+            watch: {
+                page(val, oldVal) {
+                    if (oldVal !== null)
+                        this.fetchData()
+                }
+            },
+        }).mount('#app')
+    </script>
+</body>
+
+</html>
