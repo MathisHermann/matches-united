@@ -5,8 +5,8 @@ import Ranking from './components/Ranking.vue'
 
 <script>
 
-const UNIHOCKEY_API_URL = `https://api-v2.swissunihockey.ch/api/games?mode=team&season=2022&team_id=428375`
-const TABLE_API_URL = `https://api-v2.swissunihockey.ch/api/rankings?league=5&season=2022&game_class=12&group=Gruppe%204`
+let UNIHOCKEY_API_URL = `https://api-v2.swissunihockey.ch/api/games?mode=team&season=$season&team_id=428375`
+let TABLE_API_URL = `https://api-v2.swissunihockey.ch/api/rankings?league=5&season=$season&game_class=12&group=Gruppe%204`
 
 export default {
   data() {
@@ -16,24 +16,29 @@ export default {
       ranking: null,
       page: null,
       pages: [1, 2],
+      seasons: [2022, 2023],
+      season: null,
       current_tab: "Matches"
     }
   },
   created() {
     // fetch on init
+    this.season = this.seasons[0]
     this.fetchRankings()
     this.fetchUnihockeyData()
   },
   methods: {
     async fetchUnihockeyData() {
-      const url = `${UNIHOCKEY_API_URL}` + (this.page !== null ? `&page=${this.page}` : '')
+      let api = UNIHOCKEY_API_URL.replace('$season', this.season)
+      const url = api + (this.page !== null ? `&page=${this.page}` : '')
       let response = await (await fetch(url)).json()
       this.dates = response.data.regions[0].rows
       this.headers = response.data.headers
       this.page = response.data.context.page
     },
     async fetchRankings() {
-      let response = await (await fetch(TABLE_API_URL)).json()
+      let api = TABLE_API_URL.replace('$season', this.season)
+      let response = await (await fetch(api)).json()
       this.ranking = response.data.regions
     },
     selectTab(tab) {
@@ -43,7 +48,15 @@ export default {
   watch: {
     page(val, oldVal) {
       if (oldVal !== null)
+      this.fetchUnihockeyData()
+    },
+    season(val, oldVal) {
+      if (oldVal !== null) {
+
+        this.season = val
+        this.page = 1
         this.fetchUnihockeyData()
+      }
     }
   },
 }
@@ -73,16 +86,30 @@ export default {
             <div>
               <a v-on:click="selectTab('Matches')" type="button"
                 class="cursor-pointer inline-flex items-center rounded-l bg-white py-2 text-base font-medium text-gray-700 hover:bg-red-50">
-                <h1 class="text-xl sm:text-3xl border-r border-gray-400 px-4 leading-tight tracking-tight text-gray-900" :class="{'font-bold': current_tab == 'Matches'}">
+                <h1 class="text-xl sm:text-3xl border-r border-gray-400 px-4 leading-tight tracking-tight text-gray-900"
+                  :class="{ 'font-bold': current_tab == 'Matches' }">
                   Matches
                 </h1>
               </a>
               <a v-on:click="selectTab('Ranking')" type="button"
                 class="cursor-pointer inline-flex items-center rounded-r bg-white px-4 py-2 text-base font-medium text-gray-700 hover:bg-red-50">
-                <h1 class="text-xl sm:text-3xl leading-tight tracking-tight text-gray-900" :class="{'font-bold': current_tab == 'Ranking'}">
+                <h1 class="text-xl sm:text-3xl leading-tight tracking-tight text-gray-900"
+                  :class="{ 'font-bold': current_tab == 'Ranking' }">
                   Ranking
                 </h1>
               </a>
+            </div>
+            <div class="flex flex-row space-x-4 items-center">
+              <label for="season" class="block text-sm font-medium text-gray-700">Saison</label>
+              <select v-model="season" id="season" name="season"
+                class="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm">
+                <option disabled value="">-</option>
+                <template v-for="season in seasons">
+                  <option :id="season" :value="season">
+                    {{ season }}
+                  </option>
+                </template>
+              </select>
             </div>
             <div v-if="current_tab == 'Matches'" class="flex flex-row space-x-4 items-center">
               <label for="page" class="block text-sm font-medium text-gray-700">Seite</label>
@@ -97,7 +124,7 @@ export default {
               </select>
             </div>
           </div>
-          
+
         </div>
       </header>
       <List v-if="current_tab == 'Matches'" :dates="dates" :headers="headers" />
