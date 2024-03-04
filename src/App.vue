@@ -1,6 +1,6 @@
 <script setup>
-import List from './components/List.vue'
-import Ranking from './components/Ranking.vue'
+import List from './components/List.vue';
+import Ranking from './components/Ranking.vue';
 </script>
 
 <script>
@@ -28,39 +28,39 @@ export default {
   },
   created() {
     // fetch on init
-    this.season = current_season.data.context.season
-    this.fetchRankings()
-    this.fetchUnihockeyData()
+    this.season = current_season.data.context.season;
+    this.fetchRankings();
+    this.fetchUnihockeyData();
   },
   methods: {
     async fetchUnihockeyData() {
-      let api = UNIHOCKEY_API_URL.replace('$season', this.season)
-      const url = api + (this.page !== null ? `&page=${this.page}` : '')
-      let response = await (await fetch(url)).json()
-      this.dates = response.data.regions[0].rows
-      this.headers = response.data.headers
-      this.page = response.data.context.page
-      this.fetchRankings()
+      let api = UNIHOCKEY_API_URL.replace('$season', this.season);
+      const url = api + (this.page !== null ? `&page=${this.page}` : '');
+      let response = await (await fetch(url)).json();
+      this.dates = response.data.regions[0].rows;
+      this.headers = response.data.headers;
+      this.page = response.data.context.page;
+      this.fetchRankings();
     },
     async fetchRankings() {
-      let api = TABLE_API_URL.replace('$season', this.season)
-      let response = await (await fetch(api)).json()
-      this.ranking = response.data.regions
+      let api = TABLE_API_URL.replace('$season', this.season);
+      let response = await (await fetch(api)).json();
+      this.ranking = response.data.regions;
     },
     selectTab(tab) {
-      this.current_tab = tab
+      this.current_tab = tab;
     }
   },
   watch: {
     page(val, oldVal) {
-      if (oldVal !== null)
-      this.fetchUnihockeyData()
+      if (oldVal !== null);
+      this.fetchUnihockeyData();
     },
     season(val, oldVal) {
       if (oldVal !== null) {
-        this.season = val
-        this.page = 1
-        this.fetchUnihockeyData()
+        this.season = val;
+        this.page = 1;
+        this.fetchUnihockeyData();
       }
     }
   },

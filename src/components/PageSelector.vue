@@ -3,7 +3,7 @@
 defineProps({
     pages: Array,
     page: Number,
-})
+});
 
 </script>
 

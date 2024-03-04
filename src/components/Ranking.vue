@@ -2,7 +2,7 @@
 
 defineProps({
     ranking: Array,
-})
+});
 
 </script>
 

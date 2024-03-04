@@ -3,7 +3,7 @@
 defineProps({
     headers: Array,
     dates: Array,
-})
+});
 
 </script>
 
