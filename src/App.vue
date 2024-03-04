@@ -5,8 +5,13 @@ import Ranking from './components/Ranking.vue'
 
 <script>
 
-let UNIHOCKEY_API_URL = `https://api-v2.swissunihockey.ch/api/games?mode=team&season=$season&team_id=428375`
-let TABLE_API_URL = `https://api-v2.swissunihockey.ch/api/rankings?league=5&season=$season&game_class=12&group=Gruppe%204`
+const UNIHOCKEY_API_URL = `https://api-v2.swissunihockey.ch/api/games?mode=team&season=$season&team_id=428375`;
+const TABLE_API_URL = `https://api-v2.swissunihockey.ch/api/rankings?league=5&season=$season&game_class=12&group=Gruppe%204`;
+const SEASONS_API_URL = `https://api-v2.swissunihockey.ch/api/seasons?league=5`;
+const CURRENT_SEASON = `https://api-v2.swissunihockey.ch/api/rankings?league=5`;
+
+const all_seasons = await (await fetch(SEASONS_API_URL)).json();
+const current_season = await (await fetch(CURRENT_SEASON)).json();
 
 export default {
   data() {
@@ -16,14 +21,14 @@ export default {
       ranking: null,
       page: null,
       pages: [1, 2],
-      seasons: [2022, 2023],
+      seasons: all_seasons.entries.slice(0, 5).map(season => season.text.split('/')[0]),
       season: null,
       current_tab: "Matches"
     }
   },
   created() {
     // fetch on init
-    this.season = this.seasons[0]
+    this.season = current_season.data.context.season
     this.fetchRankings()
     this.fetchUnihockeyData()
   },
@@ -35,6 +40,7 @@ export default {
       this.dates = response.data.regions[0].rows
       this.headers = response.data.headers
       this.page = response.data.context.page
+      this.fetchRankings()
     },
     async fetchRankings() {
       let api = TABLE_API_URL.replace('$season', this.season)
@@ -52,7 +58,6 @@ export default {
     },
     season(val, oldVal) {
       if (oldVal !== null) {
-
         this.season = val
         this.page = 1
         this.fetchUnihockeyData()
