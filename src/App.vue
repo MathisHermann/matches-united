@@ -10,9 +10,6 @@ const TABLE_API_URL = `https://api-v2.swissunihockey.ch/api/rankings?league=5&se
 const SEASONS_API_URL = `https://api-v2.swissunihockey.ch/api/seasons?league=5`;
 const CURRENT_SEASON = `https://api-v2.swissunihockey.ch/api/rankings?league=5`;
 
-const all_seasons = await (await fetch(SEASONS_API_URL)).json();
-const current_season = await (await fetch(CURRENT_SEASON)).json();
-
 export default {
   data() {
     return {
@@ -21,18 +18,30 @@ export default {
       ranking: null,
       page: null,
       pages: [1, 2],
-      seasons: all_seasons.entries.slice(0, 5).map(season => season.text.split('/')[0]),
+      seasons: null,
       season: null,
       current_tab: "Matches"
     }
   },
   created() {
     // fetch on init
-    this.season = current_season.data.context.season;
-    this.fetchRankings();
-    this.fetchUnihockeyData();
+    this.initialFetch();
   },
   methods: {
+    async initialFetch() {
+      await this.fetchSeason();
+      await this.fetchSeasons();
+      await this.fetchRankings();
+      await this.fetchUnihockeyData();
+    },
+    async fetchSeason() {
+      let response = await (await fetch(CURRENT_SEASON)).json();
+      this.season = response.data.context.season;
+    },
+    async fetchSeasons() {
+      const all_seasons = await (await fetch(SEASONS_API_URL)).json();
+      this.seasons = all_seasons.entries.slice(0, 5).map(season => season.text.split('/')[0]);
+    },
     async fetchUnihockeyData() {
       let api = UNIHOCKEY_API_URL.replace('$season', this.season);
       const url = api + (this.page !== null ? `&page=${this.page}` : '');
